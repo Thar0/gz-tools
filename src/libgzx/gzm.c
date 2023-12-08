@@ -545,6 +545,133 @@ gzm_cat_r (struct gz_macro *gzm, const struct gz_macro *gzm1, const struct gz_ma
     return 0;
 }
 
+int
+gzm_slice(struct gz_macro *output_gzm, const struct gz_macro *input_gzm, uint32_t frame_start, uint32_t frame_end) 
+{ 
+    // Each macro must have recorded at least one rng seed for this process to work and be within the bounds of the macro frames
+    if (input_gzm->n_seed == 0 || frame_start > input_gzm->n_input || frame_end > input_gzm->n_input || frame_end <= frame_start)
+        return -1;
+
+    // Zero destination
+    memset(output_gzm, 0, sizeof(struct gz_macro));
+    // Copy inputs
+    output_gzm->n_input = frame_end - frame_start;
+    output_gzm->input = malloc(output_gzm->n_input * sizeof(struct movie_input));
+    memcpy(&output_gzm->input[0], &input_gzm->input[frame_start], output_gzm->n_input * sizeof(struct movie_input));
+	
+	int n_seed = 0;
+	int first_seed_idx = 0;
+	int last_seed_idx = 0;
+	bool first_seed_idx_set = false;
+	for (int i = 0; i < input_gzm->n_seed; i++)
+	{
+		if (input_gzm->seed[i].frame_idx >= frame_start) {
+			if (input_gzm->seed[i].frame_idx <= frame_end) { 
+				if(!first_seed_idx_set) {
+					first_seed_idx = i;
+					first_seed_idx_set = true;
+				}
+				input_gzm->seed[i].frame_idx -= frame_start;
+				n_seed++;
+			}
+			else { 
+				last_seed_idx = i - 1;
+				break;
+			}
+		}
+	}
+	output_gzm->n_seed = n_seed;
+	output_gzm->seed = malloc(output_gzm->n_seed * sizeof(struct movie_seed));
+	memcpy(&output_gzm->seed[0], &input_gzm->seed[first_seed_idx], (last_seed_idx - first_seed_idx + 1) * sizeof(struct movie_seed));
+
+	if (input_gzm->n_oca_input != 0 && input_gzm->oca_input != NULL) { 
+		// Copy oca input if present
+		int n_oca_input = 0;
+		int first_idx = 0;
+		int last_idx = 0;
+		bool first_idx_set = false;
+		for (int i = 0; i < input_gzm->n_oca_input; i++)
+		{
+			if (input_gzm->oca_input[i].frame_idx >= frame_start) {
+				if (input_gzm->oca_input[i].frame_idx <= frame_end) { 
+					if(!first_idx_set) {
+						first_idx = i;
+						first_idx_set = true;
+					}
+					input_gzm->oca_input[i].frame_idx -= frame_start;
+					n_oca_input++;
+				}
+				else { 
+					last_idx = i - 1;
+					break;
+				}
+			}
+		}
+		output_gzm->n_oca_input = n_oca_input;
+		output_gzm->oca_input = malloc(output_gzm->n_oca_input * sizeof(struct movie_oca_input));
+		memcpy(&output_gzm->oca_input[0], &input_gzm->oca_input[first_idx], (last_idx - first_idx + 1) * sizeof(struct movie_oca_input));
+	}
+	
+	if (input_gzm->n_oca_sync != 0 && input_gzm->oca_sync != NULL) { 
+		// Copy oca sync if present
+		int n_oca_sync = 0;
+		int first_idx = 0;
+		int last_idx = 0;
+		bool first_idx_set = false;
+		for (int i = 0; i < input_gzm->n_oca_sync; i++)
+		{
+			if (input_gzm->oca_sync[i].frame_idx >= frame_start) {
+				if (input_gzm->oca_sync[i].frame_idx <= frame_end) { 
+					if(!first_idx_set) {
+						first_idx = i;
+						first_idx_set = true;
+					}
+					input_gzm->oca_sync[i].frame_idx -= frame_start;
+					n_oca_sync++;
+				}
+				else { 
+					last_idx = i - 1;
+					break;
+				}
+			}
+		}
+		output_gzm->n_oca_sync = n_oca_sync;
+		output_gzm->oca_sync = malloc(output_gzm->n_oca_sync * sizeof(struct movie_oca_sync));
+		memcpy(&output_gzm->oca_sync[0], &input_gzm->oca_sync[first_idx], (last_idx - first_idx + 1) * sizeof(struct movie_oca_sync));
+	}
+		
+	if (input_gzm->n_room_load != 0 && input_gzm->room_load != NULL) { 
+		// Copy room load if present
+		int n_room_load = 0;
+		int first_idx = 0;
+		int last_idx = 0;
+		bool first_idx_set = false;
+		for (int i = 0; i < input_gzm->n_room_load; i++)
+		{
+			if (input_gzm->room_load[i].frame_idx >= frame_start) {
+				if (input_gzm->room_load[i].frame_idx <= frame_end) { 
+					if(!first_idx_set) {
+						first_idx = i;
+						first_idx_set = true;
+					}
+					input_gzm->room_load[i].frame_idx -= frame_start;
+					n_room_load++;
+				}
+				else { 
+					last_idx = i - 1;
+					break;
+				}
+			}
+		}
+		output_gzm->n_room_load = n_room_load;
+		output_gzm->room_load = malloc(output_gzm->n_room_load * sizeof(struct movie_room_load));
+		memcpy(&output_gzm->room_load[0], &input_gzm->room_load[first_idx], (last_idx - first_idx + 1) * sizeof(struct movie_room_load));
+	}
+    output_gzm->rerecords = input_gzm->rerecords; // TODO how to get this accurately if at all
+    output_gzm->last_recorded_frame = frame_end - frame_start;
+    return 0;
+}
+
 void
 gzm_print_pad (const z64_controller_t *cont)
 {

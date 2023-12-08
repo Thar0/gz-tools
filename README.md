@@ -39,3 +39,9 @@ In order to do this the first macro must end shortly after entering a loading zo
 
 Example usage: `./gzmcat macro1.gzm macro2.gzm macro3.gzm`
 (with `macro1.gzm` and `macro2.gzm` satisfying the condition outlined above)
+
+### gzmslice
+
+Slices a piece of the input macro from the input starting frame to the input ending frame into a new macro file. 
+
+Exampole usage: `./gzmslice input.gzm output.gzm 0 2000`
