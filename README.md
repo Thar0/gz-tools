@@ -44,4 +44,4 @@ Example usage: `./gzmcat macro1.gzm macro2.gzm macro3.gzm`
 
 Slices a piece of the input macro from the input starting frame to the input ending frame into a new macro file. 
 
-Exampole usage: `./gzmslice input.gzm output.gzm 0 2000`
+Example usage: `./gzmslice input.gzm output.gzm 0 2000`
