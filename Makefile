@@ -1,4 +1,4 @@
-PROGRAMS := gzmstat gzmcat
+PROGRAMS := gzmstat gzmcat gzmslice
 
 CC := gcc
 CFLAGS := -Wall -pedantic -MMD -I. -Isrc -ffunction-sections -fdata-sections

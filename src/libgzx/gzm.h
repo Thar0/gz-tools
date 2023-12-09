@@ -145,4 +145,7 @@ gzm_print_inputs (const struct gz_macro *gzm);
 void
 gzm_print_seeds (const struct gz_macro *gzm);
 
+int
+gzm_slice(struct gz_macro *output_gzm, const struct gz_macro *input_gzm, uint32_t frame_start, uint32_t frame_end);
+
 #endif
